@@ -9,19 +9,27 @@ export function useWeather(lat: number | null, lon: number | null) {
   useEffect(() => {
     if (lat === null || lon === null) return;
 
-    async function fetchWeather() {
-      setLoading(true);
-      setError(null);
-      try {
-        const weatherData = await getWeatherData(lat, lon);
-        setData(weatherData);
-      } catch (err) {
-        setError("Failed to fetch weather data.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+   // Inside src/hooks/useWeather.ts
+
+const fetchWeather = async () => {
+  // ✅ ADD THIS GUARD CLAUSE:
+  if (lat === null || lon === null) {
+    return; // Exit early if we don't have coordinates yet
+  }
+
+  setLoading(true);
+  setError(null);
+  
+  try {
+    // TypeScript now knows lat and lon are 100% strictly numbers here
+    const weatherData = await getWeatherData(lat, lon); 
+    setData(weatherData);
+  } catch (err) {
+    setError("Failed to fetch weather data.");
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchWeather();
   }, [lat, lon]);

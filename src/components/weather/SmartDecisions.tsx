@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { getSmartDecisions, WeatherConditions } from "@/services/rule-engine";
-import { 
-  CheckCircle2, AlertTriangle, XCircle, 
-  Activity, Home, HeartPulse, Sparkles
+import {
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Activity,
+  Home,
+  HeartPulse,
+  Sparkles,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -15,17 +20,44 @@ interface SmartDecisionsProps {
 
 // Map activities to logical categories for UI grouping
 const CATEGORY_MAP: Record<string, string[]> = {
-  "Health & Gear": ["Sunscreen", "Hydration", "Wear Mask", "Umbrella", "Jacket", "Hair Care"],
-  "Outdoors & Active": ["Walk", "Run", "Cycling", "Swimming", "Picnic", "Fly Kite", "Stargazing", "Walk Dog", "Photography"],
-  "Home & Auto": ["Laundry", "Wash Car", "Open Windows", "Water Plants", "Motorcycle"],
+  "Health & Gear": [
+    "Sunscreen",
+    "Hydration",
+    "Wear Mask",
+    "Umbrella",
+    "Jacket",
+    "Hair Care",
+  ],
+  "Outdoors & Active": [
+    "Walk",
+    "Run",
+    "Cycling",
+    "Swimming",
+    "Picnic",
+    "Fly Kite",
+    "Stargazing",
+    "Walk Dog",
+    "Photography",
+  ],
+  "Home & Auto": [
+    "Laundry",
+    "Wash Car",
+    "Open Windows",
+    "Water Plants",
+    "Motorcycle",
+  ],
 };
 
 function getCategoryIcon(category: string) {
   switch (category) {
-    case "Health & Gear": return <HeartPulse className="w-5 h-5 text-rose-400" />;
-    case "Outdoors & Active": return <Activity className="w-5 h-5 text-emerald-400" />;
-    case "Home & Auto": return <Home className="w-5 h-5 text-blue-400" />;
-    default: return <Sparkles className="w-5 h-5 text-purple-400" />;
+    case "Health & Gear":
+      return <HeartPulse className="w-5 h-5 text-rose-400" />;
+    case "Outdoors & Active":
+      return <Activity className="w-5 h-5 text-emerald-400" />;
+    case "Home & Auto":
+      return <Home className="w-5 h-5 text-blue-400" />;
+    default:
+      return <Sparkles className="w-5 h-5 text-purple-400" />;
   }
 }
 
@@ -34,7 +66,9 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
     if (!weatherData?.current || !weatherData?.hourly) return {};
 
     const currentHourISO = weatherData.current.time.slice(0, 13) + ":00";
-    const hourIndex = weatherData.hourly.time.findIndex((t: string) => t.startsWith(currentHourISO));
+    const hourIndex = weatherData.hourly.time.findIndex((t: string) =>
+      t.startsWith(currentHourISO),
+    );
     const safeIndex = hourIndex !== -1 ? hourIndex : 0;
 
     const conditions: WeatherConditions = {
@@ -44,7 +78,7 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
       uvIndex: weatherData.hourly.uv_index[safeIndex] || 0,
       rainProb: weatherData.hourly.precipitation_probability[safeIndex] || 0,
       visibility: weatherData.hourly.visibility[safeIndex] || 10000,
-      aqi: 50, 
+      aqi: 50,
     };
 
     const allDecisions = getSmartDecisions(conditions);
@@ -54,7 +88,7 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
       "Health & Gear": [],
       "Outdoors & Active": [],
       "Home & Auto": [],
-      "Other": [],
+      Other: [],
     };
 
     allDecisions.forEach((decision) => {
@@ -76,12 +110,16 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
 
   const container = {
     hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.15 } }
+    show: { opacity: 1, transition: { staggerChildren: 0.15 } },
   };
 
-  const itemVariant = {
-    hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  const itemVariant: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   return (
@@ -93,18 +131,22 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
           Your Day, Decoded
         </h3>
       </div>
-      
-      <motion.div 
-        variants={container} 
-        initial="hidden" 
-        animate="show" 
+
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
         className="flex flex-col gap-10"
       >
         {Object.entries(groupedDecisions).map(([category, decisions]) => {
           if (decisions.length === 0) return null;
 
           return (
-            <motion.div key={category} variants={itemVariant} className="w-full">
+            <motion.div
+              key={category}
+              variants={itemVariant}
+              className="w-full"
+            >
               {/* Category Header */}
               <div className="flex items-center gap-2 mb-4 px-2">
                 {getCategoryIcon(category)}
@@ -117,18 +159,20 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
               {/* Bento Grid for Category */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {decisions.map((decision, idx) => {
-                  const isYes = decision.recommendation === 'Yes';
-                  const isCaution = decision.recommendation === 'Caution';
-                  
+                  const isYes = decision.recommendation === "Yes";
+                  const isCaution = decision.recommendation === "Caution";
+
                   return (
                     <div
                       key={idx}
                       className={clsx(
                         // FIX: Replaced solid colors with dark glass, keeping it unified with other cards
                         "relative p-6 rounded-3xl bg-[#0f172a]/40 backdrop-blur-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-default group",
-                        isYes ? "border-white/5 hover:border-emerald-500/30" : 
-                        isCaution ? "border-white/5 hover:border-amber-500/30" : 
-                        "border-white/5 hover:border-rose-500/30"
+                        isYes
+                          ? "border-white/5 hover:border-emerald-500/30"
+                          : isCaution
+                            ? "border-white/5 hover:border-amber-500/30"
+                            : "border-white/5 hover:border-rose-500/30",
                       )}
                     >
                       <div className="relative z-10 flex items-start justify-between mb-4">
@@ -136,17 +180,25 @@ export default function SmartDecisions({ weatherData }: SmartDecisionsProps) {
                         <h4 className="font-semibold text-white text-lg tracking-wide">
                           {decision.activity}
                         </h4>
-                        
+
                         {/* FIX: Colors are strictly constrained to this badge only */}
-                        <span className={clsx(
-                          "text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border",
-                          isYes ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                          isCaution ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-                          "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                        )}>
+                        <span
+                          className={clsx(
+                            "text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 border",
+                            isYes
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                              : isCaution
+                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                : "bg-rose-500/10 text-rose-400 border-rose-500/20",
+                          )}
+                        >
                           {isYes && <CheckCircle2 className="w-3.5 h-3.5" />}
-                          {isCaution && <AlertTriangle className="w-3.5 h-3.5" />}
-                          {!isYes && !isCaution && <XCircle className="w-3.5 h-3.5" />}
+                          {isCaution && (
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                          )}
+                          {!isYes && !isCaution && (
+                            <XCircle className="w-3.5 h-3.5" />
+                          )}
                           {decision.recommendation}
                         </span>
                       </div>
